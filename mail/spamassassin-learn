@@ -1,0 +1,28 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+our $VERSION  = 0.1;
+
+my $SA_USER = 'spamd';
+my $SA_USER_GROUP = 'users';
+my $FOLDER_LEARN = '/home/spamd/learn';
+my $FOLDER_MAIL_TO_LEARN = '/srv/mail/*/*/spamd';
+my $FOLDER_SPAMASSASSIN = '/home/spamd/.spamassassin';
+
+print "Let's learn something Mr Bayes\n";
+
+`mv $FOLDER_MAIL_TO_LEARN/spam/* $FOLDER_LEARN/spam 2>&1`;
+`mv $FOLDER_MAIL_TO_LEARN/ham/* $FOLDER_LEARN/ham 2>&1`;
+
+`chown -R $SA_USER:$SA_USER_GROUP $FOLDER_LEARN`;
+`chmod -R 700 $FOLDER_LEARN`;
+
+print "Learn Spam: ", `sudo -u $SA_USER sa-learn --dbpath $FOLDER_SPAMASSASSIN --no-sync --spam $FOLDER_LEARN/spam`;
+print "Learn Ham: ", `sudo -u $SA_USER sa-learn --dbpath $FOLDER_SPAMASSASSIN --no-sync --ham $FOLDER_LEARN/ham`;
+
+`rm $FOLDER_LEARN/spam/* 2>&1`;
+`rm $FOLDER_LEARN/ham/* 2>&1`;
+
+print "Sync: ", (`cd $FOLDER_SPAMASSASSIN && sudo -u $SA_USER sa-learn --dbpath $FOLDER_SPAMASSASSIN --sync` or "\n");

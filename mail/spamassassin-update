@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# if this makes problems see http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=334829 and https://wiki.apache.org/spamassassin/BayesForceExpire
+sudo -u spamd sa-learn --force-expire --dbpath /home/spamd/.spamassassin
+
+sa-update --verbose
+sa-compile --prefspath=/home/spamd/.spamassassin &> /dev/null
+
+chmod -R 755 /var/lib/spamassassin
+chown -R spamd:users /home/spamd/.spamassassin/
+
+OUTPUT=$(rcspamd restart)
+if [ $? != 0 ]; then
+        echo "Error during expire of bayes database"
+        echo "${OUTPUT}"
+fi
+
+chown -R spamd:users /home/spamd/.spamassassin/

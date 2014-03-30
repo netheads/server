@@ -1,0 +1,5 @@
+{
+	"http://www.test.com/sub?hello=fellow": [
+		"Test .+ content"
+	]
+}

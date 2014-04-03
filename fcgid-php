@@ -1,0 +1,8 @@
+#!/bin/sh 
+
+export PHPRC="/etc/php5/fastcgi/" 
+export PHP_FCGI_CHILDREN=4
+export PHP_FCGI_MAX_REQUESTS=10000
+
+exec /srv/www/cgi-bin/php
+

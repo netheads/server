@@ -1,0 +1,39 @@
+--- check if enough partition space is left (min /var/lib/pgsql/data * 1.2)
+--- check database size for later vacuum command and use hard-link option for pg_upgrade if the database is too big
+
+# tail -f /var/log/messages /var/lib/pgsql/data/pg_log/* /var/lib/pgsql/data/postmaster.log
+
+# zypper install postgresql92 postgresql92-contrib postgresql92-server postgresql92-plperl postgresql92-plpython postgresql92-docs
+# sudo -u postgres mkdir /var/lib/pgsql/data92
+# sudo -u postgres /usr/lib/postgresql92/bin/initdb -D /var/lib/pgsql/data92
+
+--- merge configs
+
+# sudo -u postgres sh /var/backup/postgresql/postgresql_backup.sh
+# rcpostgresql stop
+# cd /var/lib/pgsql
+# sudo -u postgres /usr/lib/postgresql92/bin/pg_upgrade -d /var/lib/pgsql/data/ -D /var/lib/pgsql/data92/ -b /usr/lib/postgresql90/bin/ -B /usr/lib/postgresql92/bin/ -v
+
+# cd /var/lib/pgsql
+# mv /var/lib/pgsql/data /var/lib/pgsql/data90
+# mv /var/lib/pgsql/data92 /var/lib/pgsql/data
+
+--- reexecute tail -f ...
+
+# rcpostgresql start
+# rcpostgresql status
+
+--- CHOOSE # sudo -u postgres ./analyze_new_cluster.sh OR # sudo -u postgres vacuumdb --all --full --analyze --verbose DEPENDS ON THE DATABASE SIZE!
+
+# chkconfig --add postgresql
+
+--- remove generated upgrade helpers/files
+
+--- Run Tests
+- psql access to databases, check version and select and update some data
+- working dovecot/exim login and send/receive mails
+- websites tests (run their tests, access them and change some data)
+
+--- remove old postgres
+--- remove old data if needed
+ 

@@ -6,7 +6,7 @@ use warnings;
 use File::Copy;
 use Getopt::Compact;
 
-my $hot_backup_script = '/var/backup/svn/hot-backup.py';
+my $hot_backup_script = '/var/backup/svn/backup_svn-hot-backup.py';
 
 sub options_validate {
 	my ($opts) = @_;

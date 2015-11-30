@@ -58,15 +58,29 @@ for my $lv_name (@{$args{lv}}) {
 	my $lv = $vg{$lv_name};
 
 	while (1) {
-		if (-d "$args{backuppath}/$lv_name") {
-			my $umount = `umount $args{backuppath}/$lv_name 2>&1`;
-			print $umount;
+		if (not -d "$args{backuppath}/$lv_name") {
+			last;
+		}
 
-			if ($umount =~ m/not mounted/) {
-				last;
-			}
+		my $umount = `umount $args{backuppath}/$lv_name 2>&1`;
+		print $umount;
 
+		if ($umount eq '') {
 			print "$args{backuppath}/$lv_name unmounted\n";
+
+			last;
+		} elsif ($umount =~ m/not mounted/) {
+			last;
+		}
+
+		print "retrying in 2 seconds\n";
+
+		sleep 2;
+	}
+
+	while (1) {
+		if (not -e "/dev/$args{vg}/backup_$lv_name") {
+			last;
 		}
 
 		my $remove = `lvremove -f /dev/$args{vg}/backup_$lv_name 2>&1`;
@@ -75,6 +89,8 @@ for my $lv_name (@{$args{lv}}) {
 		if (not -l "/dev/$args{vg}/backup_$lv_name") {
 			print "/dev/$args{vg}/backup_$lv_name removed\n";
 
+			last;
+		} elsif ($remove =~ m/not found/) {
 			last;
 		}
 

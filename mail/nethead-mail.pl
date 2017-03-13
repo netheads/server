@@ -172,7 +172,7 @@ elsif ($opts->{'add-dkim'}) {
 		last;
 	}
 
-	system_cmd('sudo', 'openssl', 'genrsa', '-out', "$DKIM_PATH/$domain.pem", 768);
+	system_cmd('sudo', 'openssl', 'genrsa', '-out', "$DKIM_PATH/$domain.pem", 2048);
 	system_cmd('sudo', 'openssl', 'rsa', '-in', "$DKIM_PATH/$domain.pem", '-out', "$DKIM_PATH/$domain-public.pem", '-pubout', '-outform', 'PEM');
 	system_cmd('sudo', 'chown', 'root:mail', "$DKIM_PATH/$domain.pem");
 	system_cmd('sudo', 'chmod', '640', "$DKIM_PATH/$domain.pem");

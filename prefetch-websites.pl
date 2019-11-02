@@ -36,34 +36,46 @@ sub print_website_header {
 	print "Fetch $website ";
 }
 
-while (my ($website, $regexes) = each(%$websites)) {
+while (my ($website, $checks) = each(%$websites)) {
 	if (not $silence) {
 		print_website_header($website);
 	}
 
 	my $tx = $ua->get($website);
 
-	if ($tx->success) {
+	if (!$tx->error) {
 		my $body = $tx->res->body;
 		my $ok = 1;
 
-		for my $regex (@$regexes) {
-			if ($body !~ m/$regex/sg) {
-				if ($silence) {
-					print_website_header($website);
+        if (ref($checks) eq 'HASH') {
+            if (exists $checks->{body_size} and $checks->{body_size} != length $body) {
+		print_website_header($website);
 
-					say "\n\tRegex failed: $regex";
-				}
-				else {
-					say "\n\tRegex failed: $regex";
-				}
-			
-				$ok = 0;
-				$any_errors = 1;
-				
-				last;
-			}
-		}
+                say "\n\tFailed body size is " . (length $body) . " should be $checks->{body_size}.";
+            
+                $ok = 0;
+                $any_errors = 1;
+            }
+        }
+        else {
+            for my $regex (@$checks) {
+                if ($body !~ m/$regex/sg) {
+                    if ($silence) {
+                        print_website_header($website);
+
+                        say "\n\tRegex failed: $regex";
+                    }
+                    else {
+                        say "\n\tRegex failed: $regex";
+                    }
+                
+                    $ok = 0;
+                    $any_errors = 1;
+                    
+                    last;
+                }
+            }
+        }
 	
 		if ($ok) {
 			if (not $silence) {
